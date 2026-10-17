@@ -1,0 +1,10 @@
+$openspec-propose recover-package-change-result
+Bu örnek işi kendi domain'indeki tek kullanıcı sonucuna uyarlayın.
+Amaç: yanıt alınamadığında doğrulanmış sonucu güvenle göstermek.
+Girdi: incelenmiş docs/context/ paketi ve kararlaştırılmış ürün kuralları.
+Kapsam dışı: fiyat, uygunluk politikası, kampanya ve geçmiş talepler.
+Önce kullanılan kaynakları ve açık kararları özetle. İşin sonucunu belirleyen
+karar açıksa varsayarak tamamlamak yerine karar sahibine sor.
+Kararlar netse proposal, delta specs, design ve tasks üret.
+Kritik senaryoları, etkilenen repoları ve eski mobil istemci uyumunu belirt.
+Dosyaları kaynaklarla ilişkilendir. Kod uygulamaya geçme; review için dur.

@@ -1,0 +1,17 @@
+$openspec-explore
+Ürün/domain: <...>. İncelenecek tek akış: <...>.
+Planlama root'u: <mutlak yol>.
+Mobil checkout: <mutlak yol>, incelenecek branch/commit: <...>.
+Backend checkout: <mutlak yol>, incelenecek branch/commit: <...>.
+İş kuralı / API / tasarım / analitik kaynakları: <erişilebilir dosya veya bölüm>.
+
+Önce erişebildiğin kökleri ve eksik kaynakları raporla.
+docs/context/README.md ve sources.md varsa oku. Dizinleri keşfet; dosya adlarını
+ve stack'i varsayma. Bir akışı ekran -> istemci isteği -> API -> handler ->
+domain kuralı -> veri/olay -> ilgili test boyunca izle.
+Her bulguya repo, commit, dosya/sembol veya belge bölümü ekle.
+Gözlem, onaylı kural, varsayım, çelişki ve bilinmeyeni ayır.
+Canlı deploy/app release/flag bilgisi yoksa prod davranışı iddia etme.
+Kod değiştirme. Repo içeriğini çıkar; kalıcı dosya taslağını review için öner.
+Çıktı: kaynak sicili, akış haritası, domain sözlüğü, iş kuralları,
+açık kararlar/sahipleri, etki alanı ve okunamayan kaynaklar.

@@ -1,0 +1,187 @@
+===== openspec/specs/package-change/spec.md =====
+# Package Change
+
+## Purpose
+Paket değişikliği sonucunu kullanıcıya doğru durumla göstermek.
+Bu başlangıç davranışı eğitim örneğidir, gerçek repo bulgusu değildir.
+
+## Requirements
+
+### Requirement: Gönderim sonucu
+Sistem başarılı kabul yanıtında talebin alındığını göstermelidir (MUST).
+Yanıt alınamazsa sistem genel hata göstermelidir (MUST).
+
+#### Scenario: Kabul yanıtı alınır
+- GIVEN kullanıcı uygun bir paket değişikliği gönderdi
+- WHEN backend talebi kabul etti ve yanıt cihaza ulaştı
+- THEN kullanıcı "Talebiniz alındı" görür
+
+#### Scenario: Yanıt alınamaz
+- GIVEN kullanıcı paket değişikliği gönderdi
+- WHEN cihaz yanıt alamaz
+- THEN kullanıcı genel hata görür
+
+
+===== openspec/changes/recover-package-change-result/proposal.md =====
+## Why
+Eğitim vakasında backend talebi kabul etse de yanıt kaybolabiliyor.
+Genel hata kullanıcıyı aynı niyeti yeniden göndermeye yöneltiyor.
+Beklenen sonuç: belirsizliği doğru gösterip ikinci talebi önlemek.
+
+## What Changes
+- Doğrulanamayan sonucu belirsiz göster; kesin ret olarak etiketleme.
+- Kabul edilen ve uygulanması doğrulanmış talebi ayrı göster.
+- Aynı niyetin tekrarını aynı talebe bağla.
+- İlgili ekrana dönüşte doğrulanmamış talebi toparla.
+- Kesin ret gerekçesini ve uygun devam yolunu göster.
+Kapsam dışı: fiyat/fatura, uygunluk politikası, kampanya,
+geçmiş talep ekranı ve yeni bildirim kanalı.
+
+## Capabilities
+### New Capabilities
+- Yok.
+### Modified Capabilities
+- package-change: sonuç gösterimi, aynı niyet ve toparlanma davranışı.
+
+## Impact
+Mobil gönderim ve dönüş akışı; backend talep eşleme ve durum sorgusu;
+API sözleşmesi; eski mobil sürüm uyumu; ilgili testler ve ölçüm.
+Ürün kararları: bu eğitim için kararlaştırılmış örnek kurallar.
+Gerçek işte kaynak/sürüm, karar sahipleri ve hedef ölçüm eklenir.
+
+
+===== openspec/changes/recover-package-change-result/specs/package-change/spec.md =====
+## MODIFIED Requirements
+
+### Requirement: Gönderim sonucu
+Sistem yalnız doğrulanmış talep durumunu sonuç olarak göstermelidir (MUST).
+Kabul edilmiş talebi "Talebiniz alındı", uygulanması doğrulanmış talebi
+"Paketiniz uygulandı", doğrulanamayan sonucu "Sonuç kontrol ediliyor"
+olarak göstermelidir (MUST). Kesin rette gerekçeyi ve uygun devam yolunu
+sunmalıdır (MUST). Yanıt kaybı tek başına kesin ret değildir.
+
+#### Scenario: Kabul yanıtı alınır
+- GIVEN kullanıcı uygun paket değişikliği gönderdi
+- WHEN backend talebi kabul etti ve yanıt cihaza ulaştı
+- THEN "Talebiniz alındı" gösterilir
+- AND paket uygulanmış gibi gösterilmez
+
+#### Scenario: Yanıt alınamaz
+- GIVEN talep gönderildi
+- WHEN cihaz yanıt alamaz ve durum sorgusu da sonuç vermez
+- THEN "Sonuç kontrol ediliyor" gösterilir
+- AND kesin başarısızlık veya uygulanma gösterilmez
+
+#### Scenario: Uygulanma doğrulanır
+- GIVEN gönderilmiş bir talep var
+- WHEN yetkili durum kaynağı uygulanmayı doğrular
+- THEN "Paketiniz uygulandı" gösterilir
+
+#### Scenario: Kesin ret doğrulanır
+- GIVEN talep uygunluk nedeniyle kesin reddedildi
+- WHEN yetkili durum kaynağı reti doğrular
+- THEN uygunluk gerekçesi gösterilir
+- AND kullanıcı paket seçimine geri dönebilir
+- AND otomatik yeniden gönderim yapılmaz
+
+## ADDED Requirements
+
+### Requirement: Aynı niyetin tekrar gönderimi
+Sistem aynı kullanıcı niyetinin tekrarında ikinci paket değişikliği
+oluşturmamalıdır (MUST). Kullanıcının farklı yeni niyeti bağımsız
+bir talep olarak ele alınmalıdır (MUST).
+
+#### Scenario: Aynı niyet tekrar gönderilir
+- GIVEN ilk gönderimin sonucu bilinmiyor
+- WHEN aynı kullanıcı aynı niyeti tekrar gönderir
+- THEN aynı talebin güncel durumu döndürülür
+- AND ikinci talep oluşturulmaz
+
+#### Scenario: Eşzamanlı tekrar
+- GIVEN aynı niyetle eşzamanlı iki gönderim yapılır
+- WHEN backend bu gönderimleri işler
+- THEN en fazla bir talep kaydı oluşur
+- AND iki yanıt aynı talebe bağlanır
+
+#### Scenario: Yeni niyet
+- GIVEN önceki talebin sonucu doğrulandı
+- WHEN kullanıcı farklı bir paket seçip yeni değişikliği onaylar
+- THEN bu niyet bağımsız talep olarak işlenir
+
+### Requirement: Ekrana dönüşte toparlanma
+Sistem ilgili ekrana dönen kullanıcı için önceki doğrulanmamış talebin
+durumunu sorgulamalıdır (MUST). Durum yine doğrulanamazsa belirsiz
+gösterimi korumalıdır (MUST).
+
+#### Scenario: Uygulama yeniden açılır
+- GIVEN talep gönderildikten sonra yanıt alınmadan uygulama kapandı
+- WHEN aynı kullanıcı uygulamayı açıp paket değişikliği ekranına döner
+- THEN önceki talebin durumu sorgulanır
+- AND doğrulanırsa o sonuç gösterilir
+
+#### Scenario: Dönüşte durum kaynağına erişilemez
+- GIVEN önceki talebin sonucu doğrulanmadı
+- WHEN kullanıcı döner fakat durum sorgusu sonuç vermez
+- THEN "Sonuç kontrol ediliyor" korunur
+- AND bu niyet için ikinci talep oluşturulmaz
+
+
+===== openspec/changes/recover-package-change-result/design.md =====
+## Context
+Temsili vakada istemci yanıt alamasa da sunucu kabul etmiş olabilir.
+Bu eğitim taslağı bir çözüm yönü önerir; gerçek repo incelenmedi.
+Ürün kabulü: delta spec. Uygulamaya geçiş için aşağıdaki açık teknik
+kararlar mühendislikle tamamlanmalı.
+
+## Goals / Non-Goals
+Goals: aynı niyeti korumak, doğru durum göstermek, ekrana dönüşü toparlamak.
+Non-Goals: fiyat/uygunluk politikasını değiştirmek, yeni geçmiş ekranı.
+
+## Decisions (proposed; engineering review required)
+- operationKey gönderimden önce istemcide oluşur, aynı niyette korunur.
+  Yalnız yanıt içinde dönen requestId yeterli değil: yanıt kaybolabilir.
+- Backend (authenticated user, operationKey) eşlemesini atomik tutar.
+  Aynı key ve aynı payload aynı talebe bağlanır; farklı payload çelişki
+  olarak ele alınır. Kesin davranış API sözleşmesinde netleşir.
+- Yetkili durum sorgusu kabul / uygulanma / ret durumlarını ayırır.
+- İstemci talep bağını kapanma/dönüş boyunca korur; hesap değişiminde
+  başka kullanıcının talebini göstermez.
+
+## Risks / Trade-offs
+Eşzamanlı çift gönderim; key saklama süresi; eski istemci; geç gelen
+sonuç; yetki sınırı; servis kesintisi; ölçümde aynı niyetin iki sayılması.
+
+## Migration / Rollout
+Backend uyumunu önce hazırla; eski mobil istemcileri ayrı doğrula.
+Mobil sürüm/flag ve geri dönüş koşulunu ekipçe kararlaştır.
+Sync/archive release yapmaz.
+
+## Open Questions (block apply)
+- Atomik eşlemenin mevcut altyapıdaki yöntemi ve testi nedir? Backend sahibi.
+- Key saklama süresi / bitişte güvenli devam yolu nedir? PM + backend.
+- Eski istemci ve payload uyumsuzluğu nasıl davranır? API + mobil sahipleri.
+- Ret sözleşmesi, terminal durumlar ve yetki sınırı nedir? Domain + API.
+- Hangi test ortamı, rollout/rollback ve gözlem koşulları? QA + release.
+
+
+===== openspec/changes/recover-package-change-result/tasks.md =====
+## 1. Karar ve sözleşme
+- [ ] 1.1 Design açık sorularını sahipleriyle çöz; spec ile hizala.
+- [ ] 1.2 API durum/payload/ret/yetki sözleşmesini sürümle.
+- [ ] 1.3 Eski istemci uyumu ve release/rollback sırasını kararlaştır.
+
+## 2. Backend (yalnız kararlar tamamlandıktan sonra)
+- [ ] 2.1 Aynı niyet eşlemesini atomik uygula; yeni niyeti ayrı tut.
+- [ ] 2.2 Yetkili durum sorgusunu ve payload çelişkisini uygula.
+- [ ] 2.3 Tekrar/eşzamanlılık/yetki testlerini çalıştır, kanıt kaydet.
+
+## 3. Mobil
+- [ ] 3.1 Niyet anahtarını ilk gönderimden önce üret ve dönüşte koru.
+- [ ] 3.2 Belirsiz / alındı / uygulandı / ret gösterimlerini ayır.
+- [ ] 3.3 Dönüş, hesap değişimi ve erişilemeyen durum senaryolarını doğrula.
+
+## 4. Kabul ve kapanış
+- [ ] 4.1 Tüm delta senaryolarını ortam/sürüm/test bağlantısıyla kaydet.
+- [ ] 4.2 Başarısız ve çalıştırılmamış senaryoları görünür tut; PM/QA review.
+- [ ] 4.3 Deltayı sync et; ana spec'i incele; tamamlanan işi archive et.
+- [ ] 4.4 Gerçek release ve gözlem kaydını ayrı yürüt.

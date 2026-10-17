@@ -1,0 +1,28 @@
+# Örnek: değerleri doğrulayarak mevcut config ile birleştirin.
+# Bu şablon gerçek bir repo incelemesi değildir.
+schema: spec-driven
+context: |
+  Ürün: <ürün>. Domain: <domain>. Kullanıcı: <segment>.
+  Planlama root'u: <bu repo>. Kod repo eşlemesi docs/context/README.md'de.
+  Artifact dili Türkçe; Requirement/Scenario başlık biçimini koru.
+  Her işte önce docs/context/README.md ve kaynak sicilini oku.
+  Sonra yalnız ilgili akış, kural, API ve karar dosyalarını aç.
+  Kaynak dosyaları erişilemezse içeriklerini okumuş gibi davranma.
+  Koddan gözlenen davranış ile onaylanmış hedef davranışı ayır.
+  Mobil/backend commit, yayınlanan app sürümü ve ortamı kaydet.
+  Canlı flag, deploy veya dış servis görülmediyse bilinmiyor yaz.
+  Çelişen kaynakları ve kararı verecek kişiyi görünür kıl.
+rules:
+  proposal:
+    - Kullanıcı problemi, başarı sinyali ve kapsam dışını yaz.
+    - Etkilenen repo/ekipleri ve açık ürün kararlarını belirt.
+  specs:
+    - Gereksinimleri gözlemlenebilir davranışla ifade et.
+    - İlgili timeout, tekrar, ret ve toparlanma yollarını ele al.
+    - Ürün kuralının kaynağını veya açık karar sahibini belirt.
+  design:
+    - Eski mobil istemci, API uyumu ve release sırasını değerlendir.
+    - Teknik varsayımları ve çözülmemiş bağımlılıkları açık yaz.
+  tasks:
+    - Repo ve doğrulama sorumluluğunu açık belirt.
+    - Kritik senaryoları doğrulama görevleriyle ilişkilendir.
